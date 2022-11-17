@@ -3,14 +3,14 @@ package com.example.bluetoothchatapp
 import android.app.ActionBar
 import android.app.Dialog
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bluetoothchatapp.databinding.FragmentJoinBinding
-import com.example.bluetoothchatapp.databinding.GroupNameDialogBinding
 import com.example.bluetoothchatapp.databinding.UserNameDialogBinding
 
 class JoinFragment : Fragment(), DeviceAdapter.Callback {
@@ -40,8 +40,6 @@ class JoinFragment : Fragment(), DeviceAdapter.Callback {
 
         showNameDialog()
 
-        viewModel.startDiscovery(requireActivity().packageName)
-
         binding.tvNearbyDevices.visibility = View.VISIBLE
         binding.rvDeviceList.visibility = View.VISIBLE
 
@@ -68,6 +66,7 @@ class JoinFragment : Fragment(), DeviceAdapter.Callback {
         userNameDialogBinding.btnSubmit.setOnClickListener {
             val userName = userNameDialogBinding.etName.text.toString()
             viewModel.userName = userName
+            viewModel.startDiscovery(requireActivity().packageName)
             dialog.dismiss()
         }
     }
@@ -75,5 +74,12 @@ class JoinFragment : Fragment(), DeviceAdapter.Callback {
 
     override fun onNameClicked(groupName: String) {
         viewModel.groupEndPointId[groupName]?.let { viewModel.makeConnection(it) }
+
+        moveToChatLayout()
+    }
+
+    private fun moveToChatLayout() {
+        val action = JoinFragmentDirections.actionJoinFragmentToChatFragment()
+        findNavController().navigate(action)
     }
 }

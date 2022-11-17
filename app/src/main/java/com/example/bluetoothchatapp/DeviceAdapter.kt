@@ -12,6 +12,7 @@ class DeviceAdapter(private val mCallback: Callback? = null) : ListAdapter<Strin
     class DeviceListViewHolder(var binding: DeviceListBinding):
         RecyclerView.ViewHolder(binding.root) {
         fun bind(name: String) {
+            println("Device adapter $name")
             binding.tvGroupName.text = name
         }
     }
