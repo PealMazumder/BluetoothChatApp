@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
+import org.apache.commons.lang3.SerializationUtils
 
 
 class NearByConnectionViewModel : ViewModel() {
@@ -72,17 +73,17 @@ class NearByConnectionViewModel : ViewModel() {
 
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
+            var messageInfo = MessageInfo()
             payload.asBytes()?.let {
-                opponentMessage = it.decodeToString().toString()
+                messageInfo = SerializationUtils.deserialize(it)
             }
-            val (senderName, message) = extractSenderNameAndMessage(opponentMessage!!)
 
             if (isImHost) {
-                sendData(senderName, message)
+                sendData(messageInfo)
             }
 
-            if (senderName != userName) {
-                val obj = Data(1, senderName, message)
+            if (messageInfo.name != userName) {
+                val obj = Data(1, messageInfo.name, messageInfo.message)
                 _msgList.value = (_msgList.value?.plus(obj)
                     ?: mutableListOf(obj)) as MutableList<Data>?
             }
@@ -92,42 +93,19 @@ class NearByConnectionViewModel : ViewModel() {
         }
     }
 
-    fun sendData(messageSenderName: String, message: String) {
-        val messageWithName = addNameOnMessage(messageSenderName, message)
+    fun sendData(messageInfo: MessageInfo) {
+        val data = SerializationUtils.serialize(messageInfo)
         connectedEndPointList.value?.let {
             connectionsClient.sendPayload(
-                it, Payload.fromBytes(messageWithName.toByteArray())
+                it, Payload.fromBytes(data)
             )
         }
-        if (userName == messageSenderName) {
-            val obj = Data(0, messageSenderName, message)
+        if (userName == messageInfo.name) {
+            val obj = Data(0, messageInfo.name, messageInfo.message)
             _msgList.value = (_msgList.value?.plus(obj)
                 ?: mutableListOf(obj)) as MutableList<Data>?
         }
 
-    }
-
-    private fun addNameOnMessage(name: String, message: String): String {
-        return "$message$divider$name"
-    }
-
-    private fun extractSenderNameAndMessage(opponentMessage: String): Pair<String, String> {
-        var right = opponentMessage.length - 1
-        var left = right - 5
-
-        var actualMessage: String = ""
-        var senderName: String = ""
-        while (left > 0) {
-            if (opponentMessage.subSequence(left, right + 1) == divider) {
-                actualMessage = opponentMessage.subSequence(0, left).toString()
-                senderName =
-                    opponentMessage.subSequence(right + 1, opponentMessage.length).toString()
-                break
-            }
-            right--
-            left--
-        }
-        return Pair(senderName, actualMessage)
     }
 
     fun startAdvertising(serviceId: String) {
