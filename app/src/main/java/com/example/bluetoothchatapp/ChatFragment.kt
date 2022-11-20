@@ -36,11 +36,13 @@ class ChatFragment : Fragment() {
         binding.chatList.setHasFixedSize(true)
 
         binding.sendBtn.setOnClickListener {
-            sendMessage()
+            val messageInfo = MessageInfo(viewModel.userName, binding.sendMsgText.text.toString())
+            sendMessage(messageInfo)
         }
         binding.sendMsgText.setOnEditorActionListener(TextView.OnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
-                sendMessage()
+                val messageInfo = MessageInfo(viewModel.userName, binding.sendMsgText.text.toString())
+                sendMessage(messageInfo)
             }
             false
 
@@ -54,8 +56,8 @@ class ChatFragment : Fragment() {
         }
     }
 
-    private fun sendMessage() {
-        viewModel.sendData(viewModel.userName, binding.sendMsgText.text.toString())
+    private fun sendMessage(messageInfo: MessageInfo) {
+        viewModel.sendData(messageInfo)
         binding.sendMsgText.text?.clear()
     }
 
