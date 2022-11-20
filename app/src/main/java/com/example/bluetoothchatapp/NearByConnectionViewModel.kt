@@ -43,6 +43,7 @@ class NearByConnectionViewModel : ViewModel() {
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
             if (result.status.isSuccess) {
+                connectionsClient.stopDiscovery()
             }
         }
 

@@ -17,7 +17,6 @@ class MessageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     fun submitList(data: List<Data>) {
         this.messages.clear()
         this.messages.addAll(data)
-        notifyDataSetChanged()
     }
 
     fun addMessage(data: Data) {

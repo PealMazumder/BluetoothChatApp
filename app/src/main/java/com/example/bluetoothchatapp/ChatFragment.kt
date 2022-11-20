@@ -59,4 +59,19 @@ class ChatFragment : Fragment() {
         binding.sendMsgText.text?.clear()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.connectionsClient.stopAdvertising()
+        viewModel.connectionsClient.stopDiscovery()
+        resetInfo()
+    }
+
+    private fun resetInfo() {
+        viewModel.apply {
+            groupEndPointId.clear()
+            userName = ""
+            groupName = ""
+            opponentMessage = ""
+        }
+    }
 }
